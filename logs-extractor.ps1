@@ -20,28 +20,35 @@ ForEach ($computer in $computerList){
     $Global:outputDirectory = ".\" + $computer + "_" + $ipaddress + "\"
     $Global:outputFileName = $outputDirectory +"\" + $computer + "_" + $ipaddress + ".csv"
     $Global:hivelist = "HKCU", "HKLM", "HKCR", "HKU", "HKCC", "HKPD"  
-    
+    #$computer = "TESTMACHINE01"
     #Testing if a directory exists for the individual system exists. If not, create a directory.
     if(!(Test-Path -Path $outputDirectory)){
         New-Item -ItemType Directory -Force -Path $outputDirectory
     }
-
+    
     <# The following function will extract all registry keys and export out to <hive root>.csv. #>
     Write-Host ("Starting registry extraction... - " + $computer ) -ForegroundColor Green
-    ForEach($hive in $hivelist){
-        if($computer -match $env:COMPUTERNAME){
+    if($computer -match $env:COMPUTERNAME){
+        ForEach($hive in $hivelist){
             Get-ChildItem -recurse ($hive + ":\") -ErrorAction SilentlyContinue | export-csv ($outputDirectory + $hive + ".csv") -NoTypeInformation
         }
-        else{
-            try{
-                Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -recurse ($hive + ":\")} | export-csv ($outputDirectory + $hive + ".csv") -NoTypeInformation
-            }
-            catch [System.Security.SecurityException] {
-                Write-Host ($_) -ForegroundColor Red
-                Write-Host ("Please ensure that you are logged into an Administrator Account") -ForegroundColor Red
-            }
+    }
+    else{
+        try{
+            # The following liners are written independently due to an issue of Get-ChildItem not being able to read variables in it's file when branching from the hive root.
+            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCU:\ -recurse -force} | export-csv ($outputDirectory + "HKCU" + ".csv") -NoTypeInformation
+            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKLM:\ -recurse -force} | export-csv ($outputDirectory + "HKLM" + ".csv") -NoTypeInformation
+            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCR:\ -recurse -force} | export-csv ($outputDirectory + "HKCR" + ".csv") -NoTypeInformation
+            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKU:\ -recurse -force} | export-csv ($outputDirectory + "HKU" + ".csv") -NoTypeInformation
+            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCC:\ -recurse -force} | export-csv ($outputDirectory + "HKCC" + ".csv") -NoTypeInformation
+            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKPD:\ -recurse -force} | export-csv ($outputDirectory + "HKPD" + ".csv") -NoTypeInformation
+        }
+        catch [System.Security.SecurityException] {
+            Write-Host ($_) -ForegroundColor Red
+            Write-Host ("Please ensure that you are logged into an Administrator Account") -ForegroundColor Red
         }
     }
+        
     Write-Host ("Registry extraction for " + $computer + " has been completed.") -ForegroundColor Green
 
     # Stores all the log names into a variable "logNames"
@@ -68,7 +75,7 @@ ForEach ($computer in $computerList){
         # Creates a variable to get a log name from the list $logNames iteratively through "ForEach-Object" loop.
         $LogName = $_.logname
 
-        # Line 72 - 75 is meant to create a "dashboard" for progress tracking.
+        # The next 4 lines are meant to create a "dashboard" for progress tracking.
         $Index = [array]::IndexOf($logNames,$_)
         $Percentage = $Index / $Count
         $Message = "Retrieving logs ($Index of $Count)"
