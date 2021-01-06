@@ -34,7 +34,7 @@ ForEach ($computer in $computerList){
         }
         else{
             try{
-                Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -recurse ($hive + ":\") | export-csv ($outputDirectory + $hive + ".csv") -NoTypeInformation}
+                Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -recurse ($hive + ":\")} | export-csv ($outputDirectory + $hive + ".csv") -NoTypeInformation
             }
             catch [System.Security.SecurityException] {
                 Write-Host ($_) -ForegroundColor Red
