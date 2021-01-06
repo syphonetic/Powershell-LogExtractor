@@ -9,4 +9,4 @@ When executing the script:
      a. Remote Procedure Call       
      b. DCOM Server Process Launcher
      c. WinRM (you can call "winrm quickconfig" in powershell to set up a firewall exception and run the service)
-  4. Make sure that your Domain Administrator have given been given the permission to read your keys.   
+  
