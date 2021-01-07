@@ -5,6 +5,7 @@ This script mainly helps to automate the action of extracting all windows event 
 How to run: 
 
 .\logs-extractor.ps1 -> when running on local systems
+
 .\logs-extractor.ps1 [-AD] -> when running on active directories or domain controller
 
 
