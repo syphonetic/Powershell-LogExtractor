@@ -8,6 +8,7 @@ How to run:
 
 .\logs-extractor.ps1 [-AD] -> when running on active directories or domain controller
 
+Note: The logs will be extracted to the same directory where you had executed the script. Do ensure that you have ample size in your storage to run your script.
 
 When executing the script:
   1. Make sure you're executing it on administrator mode.
