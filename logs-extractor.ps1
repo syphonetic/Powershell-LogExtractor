@@ -1,7 +1,9 @@
 #requires -version 2
 
-<# Checks if the script is being ran as administrator. Having administrator rights would be useful in the log collection #>
+# Includes -AD as a flag option for the execution of powershell script.
+Param([switch] $AD)
 
+<# Checks if the script is being ran as administrator. Having administrator rights would be useful in the log collection #>
 Write-Host "Checking for elevated permissions..."
 if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
     Write-Warning -Message "Running as non-admin. To facilitate proper log collection, please open the PowerShell console as an administrator and run this script again." -Debug
@@ -11,16 +13,28 @@ else {
     Write-Host "Code is running as administrator — go on executing the script..." -ForegroundColor Green
 }
 
+if($AD){
+    Write-Host "Obtaining computer names from domain..." -ForegroundColor Yellow
+    $Global:computerList = (Get-ADComputer -Filter *).Name
+}
+else{
+    Write-Host "Executing on local system..." -ForegroundColor Yellow
+    $Global:computerList = $env:COMPUTERNAME
+}
 # List of computer names obtained from the domain controller
-$Global:computerList = (Get-ADComputer -Filter *).Name
+
 
 ForEach ($computer in $computerList){ 
     <# Global Variables #>
-    $Global:ipaddress = (Get-ADComputer $computer -Properties *).IPv4Address
+    if($AD){
+        $Global:ipaddress = (Get-ADComputer $computer -Properties *).IPv4Address
+    }
+    else{
+        $Global:ipaddress = (Test-Connection -ComputerName $computer -Count 1  | Select -ExpandProperty IPV4Address).IPAddressToString
+    }
     $Global:outputDirectory = ".\" + $computer + "_" + $ipaddress + "\"
     $Global:outputFileName = $outputDirectory +"\" + $computer + "_" + $ipaddress + ".csv"
     $Global:hivelist = "HKCU", "HKLM", "HKCR", "HKU", "HKCC", "HKPD"  
-    #$computer = "TESTMACHINE01"
     #Testing if a directory exists for the individual system exists. If not, create a directory.
     if(!(Test-Path -Path $outputDirectory)){
         New-Item -ItemType Directory -Force -Path $outputDirectory
@@ -28,7 +42,7 @@ ForEach ($computer in $computerList){
     
     <# The following function will extract all registry keys and export out to <hive root>.csv. #>
     Write-Host ("Starting registry extraction... - " + $computer ) -ForegroundColor Green
-    if($computer -match $env:COMPUTERNAME){
+    if(!$AD){
         ForEach($hive in $hivelist){
             Get-ChildItem -recurse ($hive + ":\") -ErrorAction SilentlyContinue | export-csv ($outputDirectory + $hive + ".csv") -NoTypeInformation
         }
