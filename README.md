@@ -1,6 +1,9 @@
 # Powershell-LogExtractor
 
-This script mainly helps to automate the action of extracting all windows event and registry logs in a network from the Domain Controller.
+This script mainly helps to automate the action of extracting all windows event and registry logs from a local system or a network from the Domain Controller.
+
+How to run: .\log-extracvtor.ps1 [-AD]
+  Running with the param -AD means you are running the script on a domain controller or active directory.
 
 When executing the script:
   1. Make sure you're executing it on administrator mode.
@@ -20,4 +23,4 @@ Sample of end result:
 
 ![alt text](https://i.postimg.cc/9Fb52P2B/sample-result.png "Sample of end result")
 
-
+TODO: Split up large csv files into smaller chunks, prompt user to specify a start date.
