@@ -25,44 +25,94 @@ else{
 
 
 ForEach ($computer in $computerList){ 
-    <# Global Variables #>
+    
     if($AD){
         $Global:ipaddress = (Get-ADComputer $computer -Properties *).IPv4Address
     }
     else{
         $Global:ipaddress = (Test-Connection -ComputerName $computer -Count 1  | Select -ExpandProperty IPV4Address).IPAddressToString
     }
+
+    <# Global Variables #>
+    # For limiting the CSV output at the end
+    $Global:maxRecords = 5000 <# Change the value here for different file sizing #>
     $Global:outputDirectory = ".\" + $computer + "_" + $ipaddress + "\"
-    $Global:outputFileName = $outputDirectory +"\" + $computer + "_" + $ipaddress + ".csv"
-    $Global:hivelist = "HKCU", "HKLM", "HKCR", "HKU", "HKCC", "HKPD"  
-    #Testing if a directory exists for the individual system exists. If not, create a directory.
+    $Global:outputFileName = $outputDirectory + "\EventLogs\" + $computer + "_" + $ipaddress + '_{0:d3}.csv'
+    $Global:hivelist = "HKCU", "HKLM", "HKCR", "HKU", "HKCC", "HKPD"
+    
+    # Checks if a directory exists for the individual system exists. If not, create a directory.
     if(!(Test-Path -Path $outputDirectory)){
         New-Item -ItemType Directory -Force -Path $outputDirectory
     }
     
     <# The following function will extract all registry keys and export out to <hive root>.csv. #>
     Write-Host ("Starting registry extraction... - " + $computer ) -ForegroundColor Green
+    
+    # If it is running on local system, the following codes will execute
     if(!$AD){
         ForEach($hive in $hivelist){
-            Get-ChildItem -recurse ($hive + ":\") -ErrorAction SilentlyContinue | export-csv ($outputDirectory + $hive + ".csv") -NoTypeInformation
+            $hiveDirectory = $outputDirectory + $hive + "\"
+            # Checks if a directory exists for the hive root keys. If not, create them.
+            if(!(Test-Path -Path $hiveDirectory)){
+                New-Item -ItemType Directory -Force -Path $hiveDirectory
+            }
+            Get-ChildItem -recurse ($hive + ":\") -ErrorAction SilentlyContinue | ForEach-Object -Begin {$i = 0} -Process {
+                $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
+                $_ | Export-Csv ($hiveDirectory + $hive + '_{0:d3}.csv' -f $objIndex) -NoType -Append
+                $i++
+            }
         }
-    }
+    } 
+   
+    # If it is running on AD network, the following codes will execute instead
     else{
         try{
+            ForEach($hive in $hivelist){
+                # Checks if a directory exists for the hive root keys. If not, create them.
+                $hiveDirectory = $outputDirectory + $hive + "\"
+                Write-Host "Entered hive loop" -ForegroundColor DarkRed
+                if(!(Test-Path -Path $hiveDirectory)){
+                    New-Item -ItemType Directory -Force -Path $hiveDirectory
+                }
+            }
             # The following liners are written independently due to an issue of Get-ChildItem not being able to read variables in it's file when branching from the hive root.
-            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCU:\ -recurse -force} | export-csv ($outputDirectory + "HKCU" + ".csv") -NoTypeInformation
-            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKLM:\ -recurse -force} | export-csv ($outputDirectory + "HKLM" + ".csv") -NoTypeInformation
-            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCR:\ -recurse -force} | export-csv ($outputDirectory + "HKCR" + ".csv") -NoTypeInformation
-            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKU:\ -recurse -force} | export-csv ($outputDirectory + "HKU" + ".csv") -NoTypeInformation
-            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCC:\ -recurse -force} | export-csv ($outputDirectory + "HKCC" + ".csv") -NoTypeInformation
-            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKPD:\ -recurse -force} | export-csv ($outputDirectory + "HKPD" + ".csv") -NoTypeInformation
+            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCU:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
+                $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
+                $_ | Export-Csv ($outputDirectory + "HKCU\" + "HKCU"  + '_{0:d3}.csv' -f $objIndex) -NoType -Append
+                $i++
+            }
+            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKLM:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
+                $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
+                $_ | Export-Csv ($outputDirectory + "HKLM\" + "HKLM" + '_{0:d3}.csv' -f $objIndex) -NoType -Append
+                $i++
+            }
+            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCR:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
+                $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
+                $_ | Export-Csv ($outputDirectory + "HKCR\" + "HKCR" + '_{0:d3}.csv' -f $objIndex) -NoType -Append
+                $i++
+            }
+            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKU:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
+                $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
+                $_ | Export-Csv ($outputDirectory + "HKU\" + "HKU" + '_{0:d3}.csv' -f $objIndex) -NoType -Append
+                $i++
+            }
+            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCC:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
+                $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
+                $_ | Export-Csv ($outputDirectory + "HKCC\" + "HKCC" + '_{0:d3}.csv' -f $objIndex) -NoType -Append
+                $i++
+            }
+            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKPD:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
+                $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
+                $_ | Export-Csv ($outputDirectory + "HKPD\" + "HKPD" + '_{0:d3}.csv' -f $objIndex) -NoType -Append
+                $i++
+            }
         }
         catch [System.Security.SecurityException] {
             Write-Host ($_) -ForegroundColor Red
             Write-Host ("Please ensure that you are logged into an Administrator Account") -ForegroundColor Red
         }
     }
-        
+            
     Write-Host ("Registry extraction for " + $computer + " has been completed.") -ForegroundColor Green
 
     # Stores all the log names into a variable "logNames"
@@ -99,18 +149,25 @@ ForEach ($computer in $computerList){
         Get-WinEvent -FilterHashtable @{
             LogName   = $LogName
             #StartTime can be modified accordingly through the Get-Date method. (AddDays/AddMonths/AddYears)
-            StartTime = (Get-Date).AddDays(-1)
+            StartTime = (Get-Date).AddYears(-1) <# Change the value here for different time range (AddDays/AddMonths/AddYears) #>
             EndTime = Get-Date
         } -ea 0
     }
 
     if($logs)
     {
+        $index = [array]::IndexOf($logs,$_)
+        $newCount = $logs.count
+        $percentage = $Index / $newCount
+        Write-Progress -Activity 'Almost done!' -PercentComplete 100 -CurrentOperation 'Exporting the logs now (Max rows: 5000)...' -Completed -Status 'Done'
+        
         $Global:sortedLogs = $logs  |
         Sort-Object -Property timecreated |
-        Select-Object -Property timecreated, id, logname, leveldisplayname, message
-
-        Write-Progress -Activity 'Exporting' -PercentComplete 100 -CurrentOperation '...' -Completed -Status 'Done'
-        $sortedLogs | Export-csv ($outputFileName)  -NoTypeInformation -Verbose
+        Select-Object -Property timecreated, id, logname, leveldisplayname, message|
+        ForEach-Object -Begin {$i = 0} -Process {
+            $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
+            $_ | Export-Csv ($outputFileName -f $objIndex) -NoType -Append
+            $i++
+        }
     }
 }
