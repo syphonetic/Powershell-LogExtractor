@@ -58,7 +58,7 @@ ForEach ($computer in $computerList){
             }
             Get-ChildItem -recurse ($hive + ":\") -ErrorAction SilentlyContinue | ForEach-Object -Begin {$i = 0} -Process {
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($hiveDirectory + $hive + '_{0:d3}.csv' -f $objIndex) -NoType -Append
+                $_ | Export-Csv ($hiveDirectory + $hive + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append
                 $i++
             }
         }
@@ -77,32 +77,32 @@ ForEach ($computer in $computerList){
             # The following liners are written independently due to an issue of Get-ChildItem not being able to read variables in it's file when branching from the hive root.
             Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCU:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($outputDirectory + "HKCU\" + "HKCU"  + '_{0:d3}.csv' -f $objIndex) -NoType -Append
+                $_ | Export-Csv ($outputDirectory + "HKCU\" + "HKCU"  + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append
                 $i++
             }
             Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKLM:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($outputDirectory + "HKLM\" + "HKLM" + '_{0:d3}.csv' -f $objIndex) -NoType -Append
+                $_ | Export-Csv ($outputDirectory + "HKLM\" + "HKLM" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append
                 $i++
             }
             Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCR:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($outputDirectory + "HKCR\" + "HKCR" + '_{0:d3}.csv' -f $objIndex) -NoType -Append
+                $_ | Export-Csv ($outputDirectory + "HKCR\" + "HKCR" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append
                 $i++
             }
             Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKU:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($outputDirectory + "HKU\" + "HKU" + '_{0:d3}.csv' -f $objIndex) -NoType -Append
+                $_ | Export-Csv ($outputDirectory + "HKU\" + "HKU" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append
                 $i++
             }
             Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCC:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($outputDirectory + "HKCC\" + "HKCC" + '_{0:d3}.csv' -f $objIndex) -NoType -Append
+                $_ | Export-Csv ($outputDirectory + "HKCC\" + "HKCC" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append
                 $i++
             }
             Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKPD:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($outputDirectory + "HKPD\" + "HKPD" + '_{0:d3}.csv' -f $objIndex) -NoType -Append
+                $_ | Export-Csv ($outputDirectory + "HKPD\" + "HKPD" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append
                 $i++
             }
         }
