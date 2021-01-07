@@ -1,6 +1,6 @@
 # Powershell-LogExtractor
 
-This script mainly helps to automate the action of extracting all windows event and registry logs from a local system or a network from the Domain Controller.
+This script mainly helps to automate the action of extracting all windows event and registry logs from a local system or a network from the Domain Controller. Exported files have a maxRecords variable to assist with the file sizing and all registry keys have their individual folders for easier navigation. The timeframe of the extracted logs can be modified from within the code (check the comments).
 
 How to run: 
 
@@ -31,4 +31,3 @@ Sample of end result:
 
 ![alt text](https://i.postimg.cc/9Fb52P2B/sample-result.png "Sample of end result")
 
-TODO: Split up large csv files into smaller chunks, prompt user to specify a start date.
