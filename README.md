@@ -2,8 +2,8 @@
 
 This script mainly helps to automate the action of extracting all windows event and registry logs from a local system or a network from the Domain Controller.
 
-How to run: .\log-extracvtor.ps1 [-AD]
-  Running with the param -AD means you are running the script on a domain controller or active directory.
+How to run: .\logs-extractor.ps1 [-AD]
+Running with the param -AD means you are running the script on a domain controller or active directory.
 
 When executing the script:
   1. Make sure you're executing it on administrator mode.
