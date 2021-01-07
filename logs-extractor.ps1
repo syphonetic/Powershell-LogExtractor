@@ -70,7 +70,6 @@ ForEach ($computer in $computerList){
             ForEach($hive in $hivelist){
                 # Checks if a directory exists for the hive root keys. If not, create them.
                 $hiveDirectory = $outputDirectory + $hive + "\"
-                Write-Host "Entered hive loop" -ForegroundColor DarkRed
                 if(!(Test-Path -Path $hiveDirectory)){
                     New-Item -ItemType Directory -Force -Path $hiveDirectory
                 }
