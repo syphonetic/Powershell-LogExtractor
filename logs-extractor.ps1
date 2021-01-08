@@ -35,7 +35,7 @@ ForEach ($computer in $computerList){
 
     <# Global Variables #>
     # For limiting the CSV output at the end
-    $Global:maxRecords = 5000 <# Change the value here for different file sizing #>
+    $Global:maxRecords = 20000 <# Change the value here for different file sizing #>
     $Global:outputDirectory = ".\" + $computer + "_" + $ipaddress + "\"
     $Global:outputFileName = $outputDirectory + "\EventLogs\" + $computer + "_" + $ipaddress + '_{0:d3}.csv'
     $Global:hivelist = "HKCU", "HKLM", "HKCR", "HKU", "HKCC", "HKPD"
