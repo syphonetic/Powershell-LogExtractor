@@ -50,22 +50,6 @@ ForEach ($computer in $computerList){
     
     # If it is running on local system, the following codes will execute
     if(!$AD){
-        ForEach($hive in $hivelist){
-            $hiveDirectory = $outputDirectory + $hive + "\"
-            # Checks if a directory exists for the hive root keys. If not, create them.
-            if(!(Test-Path -Path $hiveDirectory)){
-                New-Item -ItemType Directory -Force -Path $hiveDirectory
-            }
-            Get-ChildItem -recurse ($hive + ":\") -ErrorAction SilentlyContinue | ForEach-Object -Begin {$i = 0} -Process {
-                $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($hiveDirectory + $hive + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Verbose 
-                $i++
-            }
-        }
-    } 
-   
-    # If it is running on AD network, the following codes will execute instead
-    else{
         try{
             # The following liners are written independently due to an issue of Get-ChildItem not being able to read variables in it's file when branching from the hive root.
             Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCU:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
@@ -74,7 +58,7 @@ ForEach ($computer in $computerList){
                     New-Item -ItemType Directory -Force -Path $hiveDirectory
                 }
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($outputDirectory + "HKCU\" + "HKCU"  + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Verbose 
+                $_ | Export-Csv ($outputDirectory + "HKCU\" + "HKCU"  + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Force -Verbose
                 $i++
             }
             Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKLM:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
@@ -83,7 +67,7 @@ ForEach ($computer in $computerList){
                     New-Item -ItemType Directory -Force -Path $hiveDirectory
                 }
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($outputDirectory + "HKLM\" + "HKLM" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Verbose 
+                $_ | Export-Csv ($outputDirectory + "HKLM\" + "HKLM" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Force -Verbose
                 $i++
             }
             Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCR:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
@@ -92,7 +76,7 @@ ForEach ($computer in $computerList){
                     New-Item -ItemType Directory -Force -Path $hiveDirectory
                 }
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($outputDirectory + "HKCR\" + "HKCR" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Verbose 
+                $_ | Export-Csv ($outputDirectory + "HKCR\" + "HKCR" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Force -Verbose
                 $i++
             }
             Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKU:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
@@ -101,7 +85,7 @@ ForEach ($computer in $computerList){
                     New-Item -ItemType Directory -Force -Path $hiveDirectory
                 }
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($outputDirectory + "HKU\" + "HKU" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Verbose 
+                $_ | Export-Csv ($outputDirectory + "HKU\" + "HKU" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Force -Verbose
                 $i++
             }
             Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCC:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
@@ -110,7 +94,7 @@ ForEach ($computer in $computerList){
                     New-Item -ItemType Directory -Force -Path $hiveDirectory
                 }
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($outputDirectory + "HKCC\" + "HKCC" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Verbose 
+                $_ | Export-Csv ($outputDirectory + "HKCC\" + "HKCC" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Force -Verbose
                 $i++
             }
             Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKPD:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
@@ -119,13 +103,29 @@ ForEach ($computer in $computerList){
                     New-Item -ItemType Directory -Force -Path $hiveDirectory
                 }
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($outputDirectory + "HKPD\" + "HKPD" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Verbose 
+                $_ | Export-Csv ($outputDirectory + "HKPD\" + "HKPD" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Force -Verbose
                 $i++
             }
         }
         catch [System.Security.SecurityException] {
             Write-Host ($_) -ForegroundColor Red
             Write-Host ("Please ensure that you are logged into an Administrator Account") -ForegroundColor Red
+        }        
+    } 
+   
+    # If it is running on AD network, the following codes will execute instead
+    else{
+        ForEach($hive in $hivelist){
+            $hiveDirectory = $outputDirectory + $hive + "\"
+            # Checks if a directory exists for the hive root keys. If not, create them.
+            if(!(Test-Path -Path $hiveDirectory)){
+                New-Item -ItemType Directory -Force -Path $hiveDirectory
+            }
+            Get-ChildItem -recurse ($hive + ":\") -ErrorAction SilentlyContinue | ForEach-Object -Begin {$i = 0} -Process {
+                $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
+                $_ | Export-Csv ($hiveDirectory + $hive + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Force -Verbose
+                $i++
+            }
         }
     }
             
@@ -165,7 +165,7 @@ ForEach ($computer in $computerList){
         Get-WinEvent -FilterHashtable @{
             LogName   = $LogName
             #StartTime can be modified accordingly through the Get-Date method. (AddDays/AddMonths/AddYears)
-            StartTime = (Get-Date).AddYears(-1) <# Change the value here for different time range (AddDays/AddMonths/AddYears) #>
+            StartTime = (Get-Date).AddDays(-1) <# Change the value here for different time range (AddDays/AddMonths/AddYears) #>
             EndTime = Get-Date
         } -ea 0
     }
@@ -182,7 +182,7 @@ ForEach ($computer in $computerList){
         Select-Object -Property timecreated, id, logname, leveldisplayname, message|
         ForEach-Object -Begin {$i = 0} -Process {
             $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-            $_ | Export-Csv ($outputFileName -f $objIndex) -NoTypeInformation -Append -Verbose  -Append
+            $_ | Export-Csv ($outputFileName -f $objIndex) -NoTypeInformation -Append
             $i++
         }
     }
