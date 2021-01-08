@@ -58,7 +58,7 @@ ForEach ($computer in $computerList){
             }
             Get-ChildItem -recurse ($hive + ":\") -ErrorAction SilentlyContinue | ForEach-Object -Begin {$i = 0} -Process {
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($hiveDirectory + $hive + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Verbose
+                $_ | Export-Csv ($hiveDirectory + $hive + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Verbose 
                 $i++
             }
         }
@@ -74,7 +74,7 @@ ForEach ($computer in $computerList){
                     New-Item -ItemType Directory -Force -Path $hiveDirectory
                 }
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($outputDirectory + "HKCU\" + "HKCU"  + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Verbose
+                $_ | Export-Csv ($outputDirectory + "HKCU\" + "HKCU"  + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Verbose 
                 $i++
             }
             Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKLM:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
@@ -83,7 +83,7 @@ ForEach ($computer in $computerList){
                     New-Item -ItemType Directory -Force -Path $hiveDirectory
                 }
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($outputDirectory + "HKLM\" + "HKLM" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Verbose
+                $_ | Export-Csv ($outputDirectory + "HKLM\" + "HKLM" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Verbose 
                 $i++
             }
             Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCR:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
@@ -92,7 +92,7 @@ ForEach ($computer in $computerList){
                     New-Item -ItemType Directory -Force -Path $hiveDirectory
                 }
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($outputDirectory + "HKCR\" + "HKCR" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Verbose
+                $_ | Export-Csv ($outputDirectory + "HKCR\" + "HKCR" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Verbose 
                 $i++
             }
             Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKU:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
@@ -101,7 +101,7 @@ ForEach ($computer in $computerList){
                     New-Item -ItemType Directory -Force -Path $hiveDirectory
                 }
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($outputDirectory + "HKU\" + "HKU" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Verbose
+                $_ | Export-Csv ($outputDirectory + "HKU\" + "HKU" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Verbose 
                 $i++
             }
             Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCC:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
@@ -110,7 +110,7 @@ ForEach ($computer in $computerList){
                     New-Item -ItemType Directory -Force -Path $hiveDirectory
                 }
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($outputDirectory + "HKCC\" + "HKCC" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Verbose
+                $_ | Export-Csv ($outputDirectory + "HKCC\" + "HKCC" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Verbose 
                 $i++
             }
             Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKPD:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
@@ -119,7 +119,7 @@ ForEach ($computer in $computerList){
                     New-Item -ItemType Directory -Force -Path $hiveDirectory
                 }
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-                $_ | Export-Csv ($outputDirectory + "HKPD\" + "HKPD" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Verbose
+                $_ | Export-Csv ($outputDirectory + "HKPD\" + "HKPD" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Verbose 
                 $i++
             }
         }
@@ -182,7 +182,7 @@ ForEach ($computer in $computerList){
         Select-Object -Property timecreated, id, logname, leveldisplayname, message|
         ForEach-Object -Begin {$i = 0} -Process {
             $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
-            $_ | Export-Csv ($outputFileName -f $objIndex) -NoTypeInformation -Verbose -Append
+            $_ | Export-Csv ($outputFileName -f $objIndex) -NoTypeInformation -Append -Verbose  -Append
             $i++
         }
     }
