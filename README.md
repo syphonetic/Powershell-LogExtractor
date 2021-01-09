@@ -4,9 +4,9 @@ This script mainly helps to automate the action of extracting all windows event 
 
 How to run: 
 
-.\logs-extractor.ps1 -> when running on local systems
+powershell -ExecutionPolicy Bypass -File .\logs-extractor.ps1 -> when running on local systems
 
-.\logs-extractor.ps1 [-AD] -> when running on active directories or domain controller
+powershell -ExecutionPolicy Bypass -File .\logs-extractor.ps1 -AD -> when running on active directories or domain controller
 
 Note: The logs will be extracted to the same directory where you had executed the script. Do ensure that you have ample size in your storage to run your script.
 
