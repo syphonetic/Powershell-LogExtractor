@@ -147,7 +147,11 @@ ForEach ($computer in $computerList){
 
     # Used as an indicator for progress bar for tracking.
     $Count = $logNames.count
-        
+    
+    # Checks if a directory exists for the individual system exists. If not, create a directory.
+    if(!(Test-Path -Path ($outputDirectory + "\EventLogs\"))){
+        New-Item -ItemType Directory -Force -Path ($outputDirectory + "\EventLogs\")
+    }    
     
     $logs = $logNames | 
     ForEach-Object -Process{
@@ -165,7 +169,7 @@ ForEach ($computer in $computerList){
         Get-WinEvent -FilterHashtable @{
             LogName   = $LogName
             #StartTime can be modified accordingly through the Get-Date method. (AddDays/AddMonths/AddYears)
-            StartTime = (Get-Date).AddDays(-1) <# Change the value here for different time range (AddDays/AddMonths/AddYears) #>
+            StartTime = (Get-Date).AddYears(-1) <# Change the value here for different time range (AddDays/AddMonths/AddYears) #>
             EndTime = Get-Date
         } -ea 0
     }
