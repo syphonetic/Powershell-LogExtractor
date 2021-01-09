@@ -48,60 +48,71 @@ ForEach ($computer in $computerList){
     <# The following function will extract all registry keys and export out to <hive root>.csv. #>
     Write-Host ("Starting registry extraction... - " + $computer ) -ForegroundColor Green
     
-    # If it is running on local system, the following codes will execute
-    if(!$AD){
+    # If it is running on AD network, the following codes will execute 
+    if($AD){
         try{
             # The following liners are written independently due to an issue of Get-ChildItem not being able to read variables in it's file when branching from the hive root.
-            Get-ChildItem -Path HKCU:\ -recurse -force | ForEach-Object -Begin {$i = 0} -Process {
-                $hiveDirectory = $outputDirectory + "HKCU" + "\"
-                if(!(Test-Path -Path $hiveDirectory)){
-                    New-Item -ItemType Directory -Force -Path $hiveDirectory
-                }
+            $hiveDirectory = $outputDirectory + "HKCU" + "\"
+            if(!(Test-Path -Path $hiveDirectory)){
+                New-Item -ItemType Directory -Force -Path $hiveDirectory
+            }
+
+            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCU:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
                 $_ | Export-Csv ($outputDirectory + "HKCU\" + "HKCU"  + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Force -Verbose
                 $i++
             }
-            Get-ChildItem -Path HKLM:\ -recurse -force | ForEach-Object -Begin {$i = 0} -Process {
-                $hiveDirectory = $outputDirectory + "HKLM" + "\"
-                if(!(Test-Path -Path $hiveDirectory)){
-                    New-Item -ItemType Directory -Force -Path $hiveDirectory
-                }
+
+            $hiveDirectory = $outputDirectory + "HKLM" + "\"
+            if(!(Test-Path -Path $hiveDirectory)){
+                New-Item -ItemType Directory -Force -Path $hiveDirectory
+            }
+
+            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKLM:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {                
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
                 $_ | Export-Csv ($outputDirectory + "HKLM\" + "HKLM" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Force -Verbose
                 $i++
             }
-            Get-ChildItem -Path HKCR:\ -recurse -force | ForEach-Object -Begin {$i = 0} -Process {
-                $hiveDirectory = $outputDirectory + "HKCR" + "\"
-                if(!(Test-Path -Path $hiveDirectory)){
-                    New-Item -ItemType Directory -Force -Path $hiveDirectory
-                }
+            
+            $hiveDirectory = $outputDirectory + "HKCR" + "\"
+            if(!(Test-Path -Path $hiveDirectory)){
+                New-Item -ItemType Directory -Force -Path $hiveDirectory
+            }
+
+            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCR:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
                 $_ | Export-Csv ($outputDirectory + "HKCR\" + "HKCR" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Force -Verbose
                 $i++
             }
-            Get-ChildItem -Path HKU:\ -recurse -force | ForEach-Object -Begin {$i = 0} -Process {
-                $hiveDirectory = $outputDirectory + "HKU" + "\"
-                if(!(Test-Path -Path $hiveDirectory)){
-                    New-Item -ItemType Directory -Force -Path $hiveDirectory
-                }
+
+            $hiveDirectory = $outputDirectory + "HKU" + "\"
+            if(!(Test-Path -Path $hiveDirectory)){
+                New-Item -ItemType Directory -Force -Path $hiveDirectory
+            }
+
+            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKU:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {            
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
                 $_ | Export-Csv ($outputDirectory + "HKU\" + "HKU" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Force -Verbose
                 $i++
             }
-            Get-ChildItem -Path HKCC:\ -recurse -force | ForEach-Object -Begin {$i = 0} -Process {
-                $hiveDirectory = $outputDirectory + "HKCC" + "\"
-                if(!(Test-Path -Path $hiveDirectory)){
-                    New-Item -ItemType Directory -Force -Path $hiveDirectory
-                }
+
+            $hiveDirectory = $outputDirectory + "HKCC" + "\"
+            if(!(Test-Path -Path $hiveDirectory)){
+                New-Item -ItemType Directory -Force -Path $hiveDirectory
+            }
+
+            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKCC:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {                
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
                 $_ | Export-Csv ($outputDirectory + "HKCC\" + "HKCC" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Force -Verbose
                 $i++
             }
-            Get-ChildItem -Path HKPD:\ -recurse -force | ForEach-Object -Begin {$i = 0} -Process {
-                $hiveDirectory = $outputDirectory + "HKPD" + "\"
-                if(!(Test-Path -Path $hiveDirectory)){
-                    New-Item -ItemType Directory -Force -Path $hiveDirectory
-                }
+
+            $hiveDirectory = $outputDirectory + "HKPD" + "\"
+            if(!(Test-Path -Path $hiveDirectory)){
+                New-Item -ItemType Directory -Force -Path $hiveDirectory
+            }
+
+            Invoke-Command -ComputerName $computer -ScriptBlock {Get-ChildItem -Path HKPD:\ -recurse -force} | ForEach-Object -Begin {$i = 0} -Process {            
                 $objIndex = [int][math]::Floor([int]$i/[int]$maxRecords)
                 $_ | Export-Csv ($outputDirectory + "HKPD\" + "HKPD" + '_{0:d3}.csv' -f $objIndex) -NoTypeInformation -Append -Force -Verbose
                 $i++
@@ -113,7 +124,7 @@ ForEach ($computer in $computerList){
         }        
     } 
    
-    # If it is running on AD network, the following codes will execute instead
+    # If it is running on local system, the following codes will execute instead
     else{
         ForEach($hive in $hivelist){
             $hiveDirectory = $outputDirectory + $hive + "\"
